@@ -1,255 +1,201 @@
-<div align="center">
+# vigil bot 🦅
 
-```
-██╗   ██╗██╗ ██████╗ ██╗██╗     
-██║   ██║██║██╔════╝ ██║██║     
-██║   ██║██║██║  ███╗██║██║     
-╚██╗ ██╔╝██║██║   ██║██║██║     
- ╚████╔╝ ██║╚██████╔╝██║███████╗
-  ╚═══╝  ╚═╝ ╚═════╝ ╚═╝╚══════╝
-```
-
-**Autonomous threat intelligence, built in Rust.**
+Your own personal threat intelligence agent. Any OS. Any Platform. The security-first way. 🛡️
 
 [![Crates.io](https://img.shields.io/crates/v/vigil?style=flat-square&color=dc2626)](https://crates.io/crates/vigil)
-[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 [![Build](https://img.shields.io/github/actions/workflow/status/yasir23/vigil/ci.yml?style=flat-square)](https://github.com/yasir23/vigil/actions)
 [![Stars](https://img.shields.io/github/stars/yasir23/vigil?style=flat-square&color=f59e0b)](https://github.com/yasir23/vigil/stargazers)
 [![Discord](https://img.shields.io/discord/000000000?style=flat-square&color=5865f2&label=discord)](https://discord.gg/nayaflow)
 
-[Install](#installation) · [Quick Start](#quick-start) · [Use Cases](#use-cases) · [Docs](#documentation) · [Contributing](#contributing)
-
-</div>
+[Website](https://nayaflow.com) · [Docs](https://docs.nayaflow.com) · [Getting Started](#getting-started) · [Discord](https://discord.gg/nayaflow)
 
 ---
 
-`vigil` is an open-source AI agent CLI for cybersecurity professionals. It autonomously hunts threats, generates detection rules, investigates incidents, and pivots on indicators — all from your terminal, with no cloud dependency required.
+Vigil Bot is an autonomous threat intelligence agent you run on your own machine. It hunts threats, generates detection rules, investigates incidents, and pivots on indicators of compromise — all from your terminal, with no cloud dependency required.
 
-**One binary. No Python. No vendor lock-in. Runs anywhere.**
+The CLI is just the control plane — the product is the agent. If you want a fast, local-first, always-on threat hunter that feels like a senior SOC analyst in your terminal, this is it.
+
+Single binary. No Python. No vendor lock-in. Runs anywhere, including air-gapped environments.
+
+Preferred setup: run the onboarding wizard (`vigil onboard`) in your terminal. The wizard guides you step by step through setting up your LLM, log sources, and threat intel feeds.
+
+---
+
+## Getting started
+
+**macOS / Linux**
+```bash
+curl -fsSL https://nayaflow.com/install.sh | bash
+```
+
+**Windows (PowerShell)**
+```powershell
+iwr -useb https://nayaflow.com/install.ps1 | iex
+```
+
+**Cargo**
+```bash
+cargo install vigil
+```
+
+**Homebrew**
+```bash
+brew tap yasir23/vigil && brew install vigil
+```
+
+Then run the onboarding wizard:
+```bash
+vigil onboard
+```
+
+The wizard walks you through everything: LLM provider, log sources, threat intel feeds, and your first hunt.
+
+---
+
+## What vigil bot does
+
+Vigil Bot is a local-first AI agent for cybersecurity workflows. It reasons over your data, uses your tools, and works the way a real analyst works — not just answering questions, but taking autonomous action.
+
+- **Threat hunting** — investigate IOCs across your log sources, pivot on related indicators, map to MITRE ATT&CK, generate reports
+- **Detection engineering** — describe a behavior in plain English, get production-ready Sigma, YARA, or KQL rules back
+- **Incident response** — feed an alert or artifact, get a full investigation timeline and draft IR report
+- **Vulnerability analysis** — analyze CVEs against your environment, check exposure, get remediation steps
+- **Recon & red team** — passive recon pipelines, tool chaining, automated pentest report drafts
+- **Playbooks** — YAML-defined agent workflows you can save, share, and reuse across your team
+
+---
+
+## Quick demo
 
 ```
-$ vigil hunt --ioc "185.220.101.47" --sources elastic,virustotal,shodan
+$ vigil hunt --ioc "185.220.101.47"
 
-⠿ Querying Elasticsearch...       ████████████░░░ 12 events found
-⠿ Pivoting on related IOCs...      ████████████████ 3 related IPs
-⠿ Enriching via VirusTotal...      ████████████████ Malicious (67/90)
-⠿ Correlating MITRE ATT&CK...      ████████████████ T1071.001, T1090
+⠿ Querying Elasticsearch...        12 events found
+⠿ Pivoting on related IOCs...       3 related IPs
+⠿ Enriching via VirusTotal...       Malicious (67/90)
+⠿ Correlating MITRE ATT&CK...       T1071.001, T1090
 
 ╔══════════════════════════════════════════════════╗
 ║  THREAT SUMMARY                                  ║
 ╠══════════════════════════════════════════════════╣
 ║  IOC         185.220.101.47                      ║
 ║  Verdict     MALICIOUS — High Confidence         ║
-║  Actor       Likely Tor exit node / C2 relay     ║
-║  Technique   T1071.001 — Application Layer Proto ║
-║  First Seen  2024-11-03 · Last Seen 2025-01-17   ║
+║  Actor       Tor exit node / C2 relay            ║
+║  Technique   T1071.001 · T1090                   ║
 ║  Related     185.220.101.48, 185.220.101.51      ║
 ╚══════════════════════════════════════════════════╝
 
-→ Full report saved to ./reports/hunt-20250127-143201.md
+→ Report saved: ./reports/hunt-20250127-143201.md
 ```
 
 ---
 
-## Why vigil?
+## LLM setup
 
-Most "AI security tools" are ChatGPT wrappers with a dashboard. `vigil` is different:
-
-| | vigil | Python-based tools | Vendor platforms |
-|---|---|---|---|
-| Single binary deploy | ✅ | ❌ | ❌ |
-| Air-gapped / offline support | ✅ | ⚠️ | ❌ |
-| Local LLM (Ollama) support | ✅ | ⚠️ | ❌ |
-| Pipeline / CI-CD friendly | ✅ | ⚠️ | ❌ |
-| Open source & auditable | ✅ | ✅ | ❌ |
-| Memory safe (Rust) | ✅ | ❌ | unknown |
-| No vendor lock-in | ✅ | ✅ | ❌ |
-
----
-
-## Installation
-
-### Cargo (recommended)
+Vigil Bot works with any OpenAI-compatible endpoint.
 
 ```bash
-cargo install vigil
-```
+# Anthropic Claude (recommended — best reasoning, strongest prompt-injection resistance)
+vigil config set llm.provider anthropic
+vigil config set llm.api_key sk-ant-...
 
-### Homebrew
-
-```bash
-brew tap yasir23/vigil
-brew install vigil
-```
-
-### Pre-built binaries
-
-Download from [Releases](https://github.com/yasir23/vigil/releases) for Linux, macOS, and Windows.
-
-```bash
-# Linux x86_64
-curl -sSL https://github.com/yasir23/vigil/releases/latest/download/vigil-linux-x86_64 \
-  -o /usr/local/bin/vigil && chmod +x /usr/local/bin/vigil
-```
-
-### Verify installation
-
-```bash
-vigil --version
-# vigil 0.1.0
-```
-
----
-
-## Quick Start
-
-### 1. Configure your LLM
-
-```bash
 # OpenAI
 vigil config set llm.provider openai
 vigil config set llm.api_key sk-...
 
-# Anthropic Claude
-vigil config set llm.provider anthropic
-vigil config set llm.api_key sk-ant-...
-
-# Local (Ollama) — fully offline, no data leaves your machine
+# Local / fully offline (Ollama)
 vigil config set llm.provider ollama
 vigil config set llm.model llama3.1:70b
 ```
 
-### 2. Connect your sources
-
-```bash
-# Elasticsearch / OpenSearch
-vigil source add elastic --url http://localhost:9200 --index logs-*
-
-# Splunk
-vigil source add splunk --url https://splunk:8089 --token your-token
-
-# Threat intel
-vigil source add virustotal --api-key your-key
-vigil source add shodan --api-key your-key
-```
-
-### 3. Run your first hunt
-
-```bash
-vigil hunt --ioc "evil.example.com"
-```
+**Air-gapped / offline mode:** Ollama support means no data ever leaves your machine. Vigil Bot runs in air-gapped SOCs, government networks, and compliance-restricted environments (FedRAMP, PCI-DSS, HIPAA) out of the box.
 
 ---
 
-## Use Cases
-
-### 🔴 Threat Hunting
-
-Autonomously investigate indicators of compromise across your log sources, pivot on related artifacts, and generate structured reports.
+## Connecting sources
 
 ```bash
-# Hunt by IOC
-vigil hunt --ioc "185.220.101.47"
-vigil hunt --ioc "evil.example.com" --sources elastic,splunk
-vigil hunt --ioc "d41d8cd98f00b204e9800998ecf8427e" --type md5
+# Log sources
+vigil source add elastic --url http://localhost:9200 --index logs-*
+vigil source add splunk  --url https://splunk:8089 --token YOUR_TOKEN
+vigil source add loki    --url http://localhost:3100
 
-# Hunt by hypothesis
-vigil hunt --hypothesis "lateral movement via RDP from workstations"
-
-# Hunt from a file of IOCs
-vigil hunt --ioc-file ./iocs.txt --parallel 5
-
-# Output options
-vigil hunt --ioc "..." --output json | jq .verdict
-vigil hunt --ioc "..." --report pdf --out ./reports/
+# Threat intel
+vigil source add virustotal --api-key YOUR_KEY
+vigil source add shodan     --api-key YOUR_KEY
+vigil source add abuseipdb  --api-key YOUR_KEY
+vigil source add misp       --url https://misp.internal --key YOUR_KEY
 ```
 
-### 🔴 Detection Rule Generation
+Run `vigil source list` to see all connected sources and their health status.
 
-Describe a threat behavior. Get production-ready detection rules.
+---
+
+## Usage
+
+### Threat hunting
 
 ```bash
-# Generate a Sigma rule
-vigil detect generate \
-  --behavior "PowerShell downloading and executing base64-encoded payload" \
-  --format sigma
+vigil hunt --ioc "185.220.101.47"
+vigil hunt --ioc "evil.example.com" --sources elastic,splunk
+vigil hunt --hypothesis "lateral movement via RDP from workstations to servers"
+vigil hunt --ioc-file ./iocs.txt --parallel 5 --output json
+```
 
-# Generate from a MITRE technique
+### Detection rule generation
+
+```bash
+vigil detect generate --behavior "PowerShell downloading base64 payload" --format sigma
 vigil detect generate --technique T1059.001 --format yara
-
-# Generate KQL for Microsoft Sentinel
-vigil detect generate \
-  --behavior "Suspicious scheduled task creation" \
-  --format kql --platform sentinel
-
-# Test a rule against your logs
+vigil detect generate --behavior "Suspicious scheduled task creation" --format kql --platform sentinel
 vigil detect test ./rules/my-rule.yml --source elastic --dry-run
 ```
 
-### 🟠 Incident Response
-
-Feed an alert or artifact. Get a full investigation timeline with MITRE mapping.
+### Incident response
 
 ```bash
-# Investigate an alert
 vigil ir investigate --alert-id "ALERT-2025-0042" --source splunk
-
-# Analyze a suspicious file
 vigil ir analyze --file ./suspicious.exe
-
-# Build an incident timeline
 vigil ir timeline --start "2025-01-27T00:00:00Z" --entity "workstation-42"
-
-# Generate IR report
 vigil ir report --incident ./incidents/inc-001.json --format markdown
 ```
 
-### 🟡 Vulnerability & Attack Surface Analysis
+### Vulnerability analysis
 
 ```bash
-# Analyze a CVE against your environment
 vigil vuln analyze --cve CVE-2024-12345 --inventory ./assets.json
-
-# Scan and assess
-vigil vuln scan --target 10.0.0.0/24 --assess
-
-# Check exposure
-vigil vuln exposure --product "nginx" --version "1.18.0"
+vigil vuln exposure --product nginx --version 1.18.0
 ```
 
-### 🟡 Autonomous Recon (Red Team)
+### Health check
 
 ```bash
-# Recon pipeline
-vigil recon --target example.com --passive
-
-# Chain tools automatically
-vigil recon --target example.com \
-  --tools nmap,nuclei,ffuf \
-  --report ./pentest-report.md
+vigil doctor
 ```
+
+Run `vigil doctor` to surface misconfigured sources, missing API keys, and connectivity issues before they affect a real investigation.
 
 ---
 
 ## Playbooks
 
-Playbooks are YAML-defined agent workflows you can share and reuse.
+Playbooks are YAML-defined agent workflows. Save, share, and reuse common investigation patterns across your team.
 
 ```yaml
 # playbooks/ransomware-hunt.yml
 name: Ransomware Indicator Hunt
 description: Hunt for common ransomware TTPs across endpoints and network logs
 author: nayaflow
-tags: [ransomware, hunting, T1486]
+tags: [ransomware, T1486]
 
 steps:
   - name: Hunt file encryption indicators
     action: hunt
     params:
       behavior: "mass file modification with extension changes"
-      sources: [elastic, splunk]
 
-  - name: Check for known ransomware IOCs
+  - name: Check known ransomware IOCs
     action: hunt
     params:
       ioc_list: ./iocs/ransomware-known.txt
@@ -268,226 +214,162 @@ steps:
 ```
 
 ```bash
-# Run a playbook
 vigil playbook run ./playbooks/ransomware-hunt.yml
-
-# List community playbooks
-vigil playbook list
-
-# Pull a community playbook
+vigil playbook list          # browse community playbooks
 vigil playbook pull ransomware-hunt
 ```
 
-Community playbooks live in [`/playbooks`](./playbooks) — contributions welcome.
+Community playbooks live in [`/playbooks`](./playbooks). Contributions welcome.
 
 ---
 
-## Local LLM / Air-Gapped Mode
+## Pipeline / automation
 
-`vigil` works fully offline with [Ollama](https://ollama.ai). No data leaves your environment.
+Exit codes are machine-readable: `0` clean · `1` suspicious · `2` malicious · `3` error
 
 ```bash
-# Install Ollama and pull a model
-ollama pull llama3.1:70b
+# JSON output for scripting
+vigil hunt --ioc "$ALERT_IP" --output json --silent | jq .verdict
 
-# Configure vigil to use it
-vigil config set llm.provider ollama
-vigil config set llm.model llama3.1:70b
+# Bulk scan
+cat daily-iocs.txt | xargs -I{} vigil hunt --ioc {} --output json >> results.ndjson
 
-# Run normally — everything stays local
-vigil hunt --ioc "185.220.101.47"
+# GitHub Actions
+- name: Scan extracted domains
+  run: |
+    vigil hunt --ioc-file domains.txt --output json \
+      | jq 'select(.verdict == "MALICIOUS")' \
+      | tee malicious.json
 ```
-
-This makes `vigil` viable in:
-- Air-gapped SOC environments
-- Government and defense networks
-- Compliance-restricted organizations (HIPAA, PCI-DSS, FedRAMP)
-- Any environment where sending log data to external APIs is prohibited
 
 ---
 
 ## Integrations
 
-### Log Sources
-| Source | Status |
-|---|---|
-| Elasticsearch / OpenSearch | ✅ Stable |
-| Splunk | ✅ Stable |
-| Loki / Grafana | ✅ Stable |
-| Microsoft Sentinel (KQL) | 🚧 Beta |
-| Chronicle | 🚧 Beta |
-| AWS CloudTrail | 🔜 Planned |
-| Azure Monitor | 🔜 Planned |
+**Log sources** — Elasticsearch · OpenSearch · Splunk · Loki · Microsoft Sentinel (beta) · Chronicle (beta) · AWS CloudTrail (planned) · Azure Monitor (planned)
 
-### Threat Intelligence
-| Source | Status |
-|---|---|
-| VirusTotal | ✅ Stable |
-| Shodan | ✅ Stable |
-| AbuseIPDB | ✅ Stable |
-| MISP | ✅ Stable |
-| AlienVault OTX | 🚧 Beta |
-| Recorded Future | 🔜 Planned |
-| MITRE ATT&CK | ✅ Stable |
+**Threat intel** — VirusTotal · Shodan · AbuseIPDB · MISP · AlienVault OTX · MITRE ATT&CK
 
-### Output Formats
-- Markdown reports
-- JSON / NDJSON (pipeline-friendly)
-- PDF (via headless rendering)
-- STIX 2.1
-- Sigma, YARA, KQL, SPL rules
-
----
-
-## Pipeline Integration
-
-`vigil` is designed for automation. Use it in CI/CD, SOAR playbooks, or cron jobs.
-
-```bash
-# Exit codes: 0 = clean, 1 = suspicious, 2 = malicious, 3 = error
-vigil hunt --ioc "$ALERT_IP" --output json --silent
-echo "Exit: $?"
-
-# Use in a shell pipeline
-cat daily-iocs.txt | xargs -I{} vigil hunt --ioc {} --output json >> results.ndjson
-
-# GitHub Actions example
-- name: Scan PR for suspicious domains
-  run: |
-    vigil hunt --ioc-file extracted-domains.txt --output json \
-      | jq 'select(.verdict == "MALICIOUS")' \
-      | tee malicious-findings.json
-```
+**Output** — Markdown · JSON/NDJSON · PDF · STIX 2.1 · Sigma · YARA · KQL · SPL
 
 ---
 
 ## Configuration
 
-Full config reference at `~/.config/vigil/config.toml`:
+Config lives at `~/.config/vigil/config.toml`. Run `vigil config edit` to open it.
 
 ```toml
 [llm]
-provider = "anthropic"         # openai | anthropic | ollama | azure
-model = "claude-3-5-sonnet"
+provider    = "anthropic"
+model       = "claude-opus-4-6"
 api_key_env = "ANTHROPIC_API_KEY"
-max_tokens = 4096
-temperature = 0.1              # Low temp for consistent, factual output
+temperature = 0.1
 
 [agent]
-max_iterations = 10            # Max reasoning steps per task
-timeout_secs = 120
-parallel_tools = 3
+max_iterations = 10
+timeout_secs   = 120
 
 [output]
 default_format = "markdown"
-report_dir = "~/.vigil/reports"
-color = true
+report_dir     = "~/.vigil/reports"
 
 [sources.elastic]
-url = "http://localhost:9200"
+url   = "http://localhost:9200"
 index = "logs-*"
-username_env = "ELASTIC_USER"
-password_env = "ELASTIC_PASS"
-
-[sources.virustotal]
-api_key_env = "VT_API_KEY"
 ```
+
+---
+
+## Built on
+
+Vigil Bot is powered by three best-in-class Rust agent frameworks, each chosen for a specific role.
+
+### [Agentor](https://github.com/agentor-ai/agentor) — Investigative IR & sandboxing
+
+Handles the high-risk, file-touching parts of vigil — malware analysis, artifact inspection, and sandboxed execution. WASM-based isolation means a malicious file can't escape the agent's reasoning loop and compromise your machine.
+
+Best for: `vigil ir analyze`, `vigil recon`
+
+### [GraphBit](https://github.com/graphbit) — Deterministic SOC orchestration
+
+Runs the multi-step pivoting logic. When vigil hunts an IOC across Elasticsearch, VirusTotal, and Shodan in parallel, GraphBit's graph-based orchestration engine ensures the results are consistent and repeatable every run — no hallucinated pivots, no infinite loops. Also handles built-in secret management for your API keys (Shodan, MISP, VT).
+
+Best for: `vigil hunt`, `vigil playbook run`
+
+### [Rig](https://github.com/0xPlaygrounds/rig) — Modular LLM chains
+
+The lightweight backbone for `vigil detect` and `vigil vuln`. Rig lets us define each command as a composable LLM chain without bloating the binary — the same philosophy as vigil itself: fast, modular, single binary.
+
+Best for: `vigil detect`, `vigil vuln`
+
+| | Agentor | GraphBit | Rig |
+|---|---|---|---|
+| Primary focus | Security & sandboxing | Reliability & determinism | Modularity & performance |
+| Sandboxing | WASM-based isolation | Resource-type safety | Basic Rust safety |
+| Workflow | Task-based agents | Graph-based orchestration | Modular LLM chains |
+| Best use case | Investigative IR tools | High-scale SOC orchestration | General CLI-based agents |
 
 ---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    CLI Layer (clap)                  │
-│         hunt | detect | ir | vuln | recon            │
-└────────────────────────┬────────────────────────────┘
-                         │
-┌────────────────────────▼────────────────────────────┐
-│                  Agent Engine (Rust)                 │
-│     Task planning → Tool selection → Reasoning loop  │
-└──────┬──────────────┬──────────────────┬────────────┘
-       │              │                  │
-┌──────▼──────┐ ┌─────▼──────┐ ┌────────▼───────┐
-│  LLM Client │ │Tool Registry│ │ Memory / State │
-│  OpenAI     │ │  log query  │ │  sled (local)  │
-│  Anthropic  │ │  threat intel│ │  session ctx  │
-│  Ollama     │ │  rule gen   │ └────────────────┘
-└─────────────┘ │  file anal  │
-                └─────┬───────┘
-                      │
-       ┌──────────────┴──────────────┐
-       │         Data Sources        │
-       │  Elastic · Splunk · Loki    │
-       │  VT · Shodan · MISP · OTX   │
-       └─────────────────────────────┘
+CLI (clap)
+  └── Agent engine (Rust)
+        ├── LLM client       — Anthropic · OpenAI · Ollama
+        ├── Tool registry    — log query · threat intel · rule gen · file analysis
+        └── Memory / state   — local (sled) · session context
+              └── Data sources
+                    Elastic · Splunk · Loki · VT · Shodan · MISP · OTX
 ```
-
----
-
-## Documentation
-
-- [Getting Started Guide](./docs/getting-started.md)
-- [Configuration Reference](./docs/configuration.md)
-- [Tool Integrations](./docs/integrations.md)
-- [Playbook Authoring](./docs/playbooks.md)
-- [API / JSON Output](./docs/api-output.md)
-- [Air-Gapped Deployment](./docs/air-gapped.md)
-- [Contributing Guide](./CONTRIBUTING.md)
 
 ---
 
 ## Contributing
 
-Contributions are what make this tool worth using. All skill levels welcome.
-
-**High-value contributions right now:**
-- New log source integrations (AWS CloudTrail, Azure Monitor, Chronicle)
-- Additional threat intel source connectors
-- Community playbooks for common threat scenarios
-- Testing and bug reports
+All contributions welcome — new source integrations, playbooks, bug reports, and docs.
 
 ```bash
 git clone https://github.com/yasir23/vigil
 cd vigil
 cargo build
 cargo test
-
-# Run against a local test environment
-cargo run -- hunt --ioc "1.2.3.4" --mock
+cargo run -- hunt --ioc "1.2.3.4" --mock   # no live sources needed
 ```
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full guide. Join us on [Discord](https://discord.gg/nayaflow) to discuss ideas before building.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines. Join [Discord](https://discord.gg/nayaflow) before starting large changes. AI/vibe-coded PRs welcome! 🤖
+
+High-value areas right now: AWS CloudTrail · Azure Monitor · Chronicle · community playbooks · Windows CI
 
 ---
 
 ## Security
 
-`vigil` handles sensitive security data. Please report vulnerabilities responsibly.
+Do not open public issues for vulnerabilities. Email [yasir@nayaflow.com](mailto:yasir@nayaflow.com) or use [GitHub private reporting](https://github.com/yasir23/vigil/security/advisories/new).
 
-**Do not** open public issues for security vulnerabilities. Instead, email `yasir@nayaflow.com` or use [GitHub's private vulnerability reporting](https://github.com/yasir23/vigil/security/advisories/new).
-
-See [SECURITY.md](./SECURITY.md) for our full disclosure policy.
+Run `vigil doctor` to surface risky or misconfigured setups before exposing anything. Review [SECURITY.md](./SECURITY.md) before exposing vigil bot to a network.
 
 ---
 
 ## Roadmap
 
 - [x] Core agent engine
-- [x] IOC hunting with Elastic, Splunk, Loki
-- [x] VirusTotal, Shodan, AbuseIPDB enrichment
-- [x] Sigma, YARA, KQL rule generation
+- [x] Elastic · Splunk · Loki log sources
+- [x] VirusTotal · Shodan · AbuseIPDB · MISP enrichment
+- [x] Sigma · YARA · KQL rule generation
 - [x] Ollama / local LLM support
 - [x] Playbook system
-- [ ] Microsoft Sentinel integration
-- [ ] STIX 2.1 report output
+- [x] `vigil doctor` health checks
+- [ ] Microsoft Sentinel (stable)
 - [ ] Chronicle integration
 - [ ] AWS CloudTrail source
-- [ ] Web UI (optional companion)
-- [ ] MCP server mode (use as a tool from other agents)
+- [ ] Azure Monitor source
+- [ ] STIX 2.1 output
+- [ ] MCP server mode
 - [ ] VSCode extension
+- [ ] Web UI companion
 
-Track progress and vote on features in [GitHub Discussions](https://github.com/yasir23/vigil/discussions).
+Vote on features in [GitHub Discussions](https://github.com/yasir23/vigil/discussions).
 
 ---
 
@@ -495,14 +377,14 @@ Track progress and vote on features in [GitHub Discussions](https://github.com/y
 
 MIT © 2025 [Nayaflow](https://nayaflow.com)
 
-This software is provided for **defensive security purposes**. Users are responsible for ensuring their use complies with applicable laws and organizational policies.
+Built for defensive security. Users are responsible for compliance with applicable laws and policies.
+
+Vigil Bot was built by Yasir and the community. 🦅 by [Nayaflow](https://nayaflow.com).
 
 ---
 
 <div align="center">
 
-**Built by the security community, for the security community.**
-
-[⭐ Star on GitHub](https://github.com/yasir23/vigil) · [💬 Join Discord](https://discord.gg/nayaflow) · [🌐 nayaflow.com](https://nayaflow.com)
+[nayaflow.com](https://nayaflow.com) · [Docs](https://docs.nayaflow.com) · [Discord](https://discord.gg/nayaflow) · [GitHub](https://github.com/yasir23/vigil)
 
 </div>
