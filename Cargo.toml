@@ -1,0 +1,53 @@
+[package]
+name = "vigil"
+version = "0.1.0"
+edition = "2021"
+authors = ["Nayaflow <yasir@nayaflow.com>"]
+description = "Your own personal threat intelligence agent. Any OS. Any Platform. The security-first way."
+license = "MIT"
+repository = "https://github.com/yasir23/vigil"
+homepage = "https://nayaflow.com"
+documentation = "https://docs.nayaflow.com"
+keywords = ["security", "threat-intelligence", "cybersecurity", "agent", "cli"]
+categories = ["command-line-utilities", "security"]
+
+[[bin]]
+name = "vigil"
+path = "src/main.rs"
+
+[dependencies]
+# CLI framework
+clap = { version = "4.5", features = ["derive", "cargo", "env"] }
+# Async runtime
+tokio = { version = "1.41", features = ["full"] }
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+# Configuration
+toml = "0.8"
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+# Terminal UI
+colored = "2.1"
+indicatif = "0.17"
+# File system
+dirs = "5.0"
+# Date/Time
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tempfile = "3.12"
+mockito = "1.5"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
