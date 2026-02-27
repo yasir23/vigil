@@ -1,5 +1,8 @@
 # vigil bot 🦅
 
+![Whisk_a8b2ecacf3b94b7969940979aa5b931edr](https://github.com/user-attachments/assets/a44e2c24-1f6f-440a-b5c9-f0d965dc4edc)
+
+
 Your own personal threat intelligence agent. Any OS. Any Platform. The security-first way. 🛡️
 
 [![Crates.io](https://img.shields.io/crates/v/vigil?style=flat-square&color=dc2626)](https://crates.io/crates/vigil)
